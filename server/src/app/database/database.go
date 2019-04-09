@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 func ConnectDatabase() *gorm.DB {
@@ -16,4 +16,8 @@ func ConnectDatabase() *gorm.DB {
 		panic("Failed to connect to database")
 	}
 	return db
+}
+
+func Boop() {
+	fmt.Println("TEST")
 }
