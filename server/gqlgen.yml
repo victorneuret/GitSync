@@ -1,0 +1,18 @@
+# Refer to https://gqlgen.com/config/
+# for detailed gqlgen.yml documentation.
+
+schema:
+- schemas/user.graphql
+
+exec:
+  filename: generated/generated.go
+  package: generated
+
+model:
+  filename: models/models.go
+  package: models
+
+resolver:
+  filename: resolver/resolver.go
+  type: Resolver
+  package: resolver

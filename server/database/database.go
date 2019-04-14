@@ -7,17 +7,21 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-func ConnectDatabase() *gorm.DB {
-	var db *gorm.DB
+var DB *gorm.DB
+
+func ConnectDatabase() {
 	var err error
-	db, err = gorm.Open("sqlite3", "/tmp/gorm.db")
+	DB, err = gorm.Open("sqlite3", "gorm.db")
 	if err != nil {
 		fmt.Println(err.Error())
 		panic("Failed to connect to database")
 	}
-	return db
 }
 
-func Boop() {
-	fmt.Println("TEST")
+func CloseDatabase() {
+	_ = DB.Close()
+}
+
+func InitialMigration() {
+	DB.AutoMigrate(User{})
 }
