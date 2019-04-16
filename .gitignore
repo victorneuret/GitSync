@@ -16,3 +16,6 @@
 
 # Dev database
 *.db
+
+# Config
+config.json

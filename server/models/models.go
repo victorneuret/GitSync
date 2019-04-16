@@ -3,10 +3,18 @@
 package models
 
 type NewUser struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	Login     string `json:"login"`
+	Email     string `json:"email"`
+	AvatarURL string `json:"avatarUrl"`
+	Token     string `json:"token"`
 }
 
 type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Login     string `json:"login"`
+	Email     string `json:"email"`
+	AvatarURL string `json:"avatarURL"`
+	Token     string `json:"token"`
 }
