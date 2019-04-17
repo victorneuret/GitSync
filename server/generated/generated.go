@@ -43,7 +43,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		CreateRepo func(childComplexity int, input models.NewRepo) int
+		CreateRepo func(childComplexity int, input models.NewRepo, token string) int
 		CreateUser func(childComplexity int, input models.NewUser) int
 		UpdateRepo func(childComplexity int, name string, input models.ModifRepo) int
 		UpdateUser func(childComplexity int, login string, input models.NewUser) int
@@ -80,7 +80,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input models.NewUser) (*models.User, error)
 	UpdateUser(ctx context.Context, login string, input models.NewUser) (*models.User, error)
-	CreateRepo(ctx context.Context, input models.NewRepo) (*models.Repo, error)
+	CreateRepo(ctx context.Context, input models.NewRepo, token string) (*models.Repo, error)
 	UpdateRepo(ctx context.Context, name string, input models.ModifRepo) (*models.Repo, error)
 }
 type QueryResolver interface {
@@ -116,7 +116,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateRepo(childComplexity, args["input"].(models.NewRepo)), true
+		return e.complexity.Mutation.CreateRepo(childComplexity, args["input"].(models.NewRepo), args["token"].(string)), true
 
 	case "Mutation.CreateUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -376,7 +376,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
     createUser(input: NewUser!): User!
     updateUser(login: String!, input: NewUser!): User!
 
-    createRepo(input: NewRepo!): Repo!
+    createRepo(input: NewRepo!, token: String!): Repo!
     updateRepo(name: String!, input: ModifRepo!): Repo!
 }`},
 	&ast.Source{Name: "schemas/query.graphql", Input: `type Query {
@@ -442,6 +442,14 @@ func (ec *executionContext) field_Mutation_createRepo_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["token"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg1
 	return args, nil
 }
 
@@ -679,7 +687,7 @@ func (ec *executionContext) _Mutation_createRepo(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateRepo(rctx, args["input"].(models.NewRepo))
+		return ec.resolvers.Mutation().CreateRepo(rctx, args["input"].(models.NewRepo), args["token"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {

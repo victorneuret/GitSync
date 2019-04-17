@@ -10,6 +10,8 @@ type ConfigStruct struct {
 		ClientID string `json:"clientID"`
 		ClientSecret string `json:"clientSecret"`
 	}
+	RepoPath string
+	BlihSSH string
 }
 
 var Config ConfigStruct

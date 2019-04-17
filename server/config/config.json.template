@@ -2,5 +2,7 @@
   "GithubOAuth": {
     "clientID": "",
     "clientSecret": ""
-  }
+  },,
+  "RepoPath": "~/repos/",
+  "BlihSSH": "git@git.epitech.eu"
 }

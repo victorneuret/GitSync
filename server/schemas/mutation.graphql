@@ -2,6 +2,6 @@ type Mutation {
     createUser(input: NewUser!): User!
     updateUser(login: String!, input: NewUser!): User!
 
-    createRepo(input: NewRepo!): Repo!
+    createRepo(input: NewRepo!, token: String!): Repo!
     updateRepo(name: String!, input: ModifRepo!): Repo!
 }

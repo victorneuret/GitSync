@@ -1,10 +1,11 @@
 package resolver
 
 import (
+	"context"
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/victorneuret/GitSync/database"
 	"github.com/victorneuret/GitSync/models"
-	"context"
+	"github.com/victorneuret/GitSync/app"
 )
 
 
@@ -65,24 +66,44 @@ func (r *queryResolver) GetRepoFromOwner(ctx context.Context, owner string) ([]m
 
 // MUTATION
 
-func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewRepo) (*models.Repo, error) {
+func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewRepo, token string) (*models.Repo, error) {
 	if !database.DB.Where(&database.Repo{Name: input.Name}).First(&database.Repo{}).RecordNotFound() {
 		return nil, gqlerror.Errorf("Repository " + input.Name + " already exist")
 	}
 
-	user := database.Repo{
+	var user database.User
+	if database.DB.Where(&database.User{Login: input.Owner}).First(&user).RecordNotFound() {
+		return nil, gqlerror.Errorf("User " + input.Owner + " does not exist")
+	}
+
+	if !app.CreateGitHubRepo(input.Name, input.Private, token) {
+		return nil, gqlerror.Errorf("Can't create github repo " + input.Name)
+	}
+	if !app.CreateBlihRepo(input.Name, user.BlihUsername, user.BlihToken) {
+		return nil, gqlerror.Errorf("Can't create blih repo " + input.Name)
+	}
+	if !app.SetMirror(input.Name, user.BlihUsername, user.Login) {
+		return nil, gqlerror.Errorf("Mirror of " + input.Name + " failed")
+	}
+
+
+	repo := database.Repo{
 		Name: input.Name,
 		Private: input.Private,
+		GithubURL: "https://github.com/" + input.Owner + "/" + input.Name,
 		Owner: input.Owner,
+		Updater: input.Owner,
 	}
-	database.DB.Create(&user)
+	database.DB.Create(&repo)
 
 	gqlRepo := database.Repo{}
 	database.DB.Where(&database.Repo{Name: input.Name}).First(&gqlRepo)
 	return &models.Repo{
 		Name: gqlRepo.Name,
 		Private: gqlRepo.Private,
+		GithubURL: gqlRepo.GithubURL,
 		Owner: gqlRepo.Owner,
+		Updater: gqlRepo.Updater,
 	}, nil
 }
 
