@@ -50,10 +50,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAllRepos func(childComplexity int) int
-		GetAllUsers func(childComplexity int) int
-		GetRepo     func(childComplexity int, name string) int
-		GetUser     func(childComplexity int, login string) int
+		GetAllRepos      func(childComplexity int) int
+		GetAllUsers      func(childComplexity int) int
+		GetRepo          func(childComplexity int, name string) int
+		GetRepoFromOwner func(childComplexity int, owner string) int
+		GetUser          func(childComplexity int, login string) int
 	}
 
 	Repo struct {
@@ -87,6 +88,7 @@ type QueryResolver interface {
 	GetUser(ctx context.Context, login string) (*models.User, error)
 	GetAllRepos(ctx context.Context) ([]models.Repo, error)
 	GetRepo(ctx context.Context, name string) (*models.Repo, error)
+	GetRepoFromOwner(ctx context.Context, owner string) ([]models.Repo, error)
 }
 
 type executableSchema struct {
@@ -177,6 +179,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetRepo(childComplexity, args["name"].(string)), true
+
+	case "Query.GetRepoFromOwner":
+		if e.complexity.Query.GetRepoFromOwner == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getRepoFromOwner_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetRepoFromOwner(childComplexity, args["owner"].(string)), true
 
 	case "Query.GetUser":
 		if e.complexity.Query.GetUser == nil {
@@ -371,6 +385,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
     getAllRepos: [Repo!]!
     getRepo(name: String!): Repo!
+    getRepoFromOwner(owner: String!): [Repo!]!
 }`},
 	&ast.Source{Name: "schemas/repo.graphql", Input: `type Repo {
     name: String!
@@ -499,6 +514,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getRepoFromOwner_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["owner"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["owner"] = arg0
 	return args, nil
 }
 
@@ -818,6 +847,40 @@ func (ec *executionContext) _Query_getRepo(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNRepo2ᚖgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getRepoFromOwner(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getRepoFromOwner_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetRepoFromOwner(rctx, args["owner"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]models.Repo)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRepo2ᚕgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -2285,6 +2348,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getRepo(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "getRepoFromOwner":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getRepoFromOwner(ctx, field)
 				if res == graphql.Null {
 					invalid = true
 				}

@@ -4,4 +4,5 @@ type Query {
 
     getAllRepos: [Repo!]!
     getRepo(name: String!): Repo!
+    getRepoFromOwner(owner: String!): [Repo!]!
 }

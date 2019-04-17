@@ -7,6 +7,9 @@ import (
 	"context"
 )
 
+
+// QUERY
+
 func (r *queryResolver) GetAllRepos(ctx context.Context) ([]models.Repo, error) {
 	var repos []database.Repo
 	database.DB.Find(&repos)
@@ -38,6 +41,29 @@ func (r *queryResolver) GetRepo(ctx context.Context, name string) (*models.Repo,
 		Updater: repo.Updater,
 	}, nil
 }
+
+func (r *queryResolver) GetRepoFromOwner(ctx context.Context, owner string) ([]models.Repo, error) {
+	var repos []database.Repo
+	if database.DB.Find(&repos).Where(&database.Repo{Owner: owner}).RecordNotFound() {
+		return nil, gqlerror.Errorf("No repositorys from " + owner + " found")
+	}
+
+	var gqlRepo []models.Repo
+	for i := 0; i < len(repos); i++ {
+		gqlRepo = append(gqlRepo, models.Repo{
+			Name: repos[i].Name,
+			Private: repos[i].Private,
+			GithubURL: repos[i].GithubURL,
+			Owner: repos[i].Owner,
+			Updater: repos[i].Updater,
+		})
+	}
+	return gqlRepo, nil
+}
+
+
+
+// MUTATION
 
 func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewRepo) (*models.Repo, error) {
 	if !database.DB.Where(&database.Repo{Name: input.Name}).First(&database.Repo{}).RecordNotFound() {
