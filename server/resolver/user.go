@@ -19,6 +19,8 @@ func (r *MutationResolverType) CreateUser(ctx context.Context, input models.NewU
 		Email: input.Email,
 		AvatarURL: input.AvatarURL,
 		Token: input.Token,
+		BlihUsername: input.BlihUsername,
+		BlihToken: input.BlihToken,
 	}
 	database.DB.Create(&user)
 
@@ -30,6 +32,8 @@ func (r *MutationResolverType) CreateUser(ctx context.Context, input models.NewU
 		Login: gqlUser.Login,
 		Email: gqlUser.Email,
 		AvatarURL: gqlUser.AvatarURL,
+		BlihUsername: gqlUser.BlihUsername,
+		BlihToken: gqlUser.BlihToken,
 	}, nil
 }
 
@@ -51,6 +55,12 @@ func (r *MutationResolverType) UpdateUser(ctx context.Context, login string, inp
 	if input.Token != "" {
 		user.Token = input.Token
 	}
+	if input.BlihUsername != "" {
+		user.BlihUsername = input.BlihUsername
+	}
+	if input.BlihToken != "" {
+		user.BlihToken = input.BlihToken
+	}
 	database.DB.Save(&user)
 
 	return &models.User{
@@ -59,6 +69,8 @@ func (r *MutationResolverType) UpdateUser(ctx context.Context, login string, inp
 		Login: user.Login,
 		Email: user.Email,
 		AvatarURL: user.AvatarURL,
+		BlihUsername: user.BlihUsername,
+		BlihToken: user.BlihToken,
 	}, nil
 }
 
@@ -74,6 +86,8 @@ func (r *queryResolver) GetAllUsers(ctx context.Context) ([]models.User, error) 
 			Login: users[i].Login,
 			Email: users[i].Email,
 			AvatarURL: users[i].AvatarURL,
+			BlihUsername: users[i].BlihUsername,
+			BlihToken: users[i].BlihToken,
 		})
 	}
 	return gqlUsers, nil
@@ -91,5 +105,7 @@ func (r *queryResolver) GetUser(ctx context.Context, login string) (*models.User
 		Login: user.Login,
 		Email: user.Email,
 		AvatarURL: user.AvatarURL,
+		BlihUsername: user.BlihUsername,
+		BlihToken: user.BlihToken,
 	}, nil
 }

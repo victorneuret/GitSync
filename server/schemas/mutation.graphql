@@ -1,0 +1,6 @@
+type Mutation {
+    createUser(input: NewUser!): User!
+    updateUser(login: String!, input: NewUser!): User!
+#    createRepo(input: NewRepo!): Repo!
+#    updateRepo(name: String!, input: NewRepo!): Repo!
+}

@@ -3,18 +3,22 @@
 package models
 
 type NewUser struct {
-	Name      string `json:"name"`
-	Login     string `json:"login"`
-	Email     string `json:"email"`
-	AvatarURL string `json:"avatarUrl"`
-	Token     string `json:"token"`
+	Name         string `json:"name"`
+	Login        string `json:"login"`
+	Email        string `json:"email"`
+	AvatarURL    string `json:"avatarUrl"`
+	Token        string `json:"token"`
+	BlihUsername string `json:"blihUsername"`
+	BlihToken    string `json:"blihToken"`
 }
 
 type User struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Login     string `json:"login"`
-	Email     string `json:"email"`
-	AvatarURL string `json:"avatarURL"`
-	Token     string `json:"token"`
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	Login        string `json:"login"`
+	Email        string `json:"email"`
+	AvatarURL    string `json:"avatarURL"`
+	Token        string `json:"token"`
+	BlihUsername string `json:"blihUsername"`
+	BlihToken    string `json:"blihToken"`
 }

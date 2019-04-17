@@ -53,12 +53,14 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		AvatarURL func(childComplexity int) int
-		Email     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Login     func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Token     func(childComplexity int) int
+		AvatarURL    func(childComplexity int) int
+		BlihToken    func(childComplexity int) int
+		BlihUsername func(childComplexity int) int
+		Email        func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Login        func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Token        func(childComplexity int) int
 	}
 }
 
@@ -135,6 +137,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.AvatarURL(childComplexity), true
+
+	case "User.BlihToken":
+		if e.complexity.User.BlihToken == nil {
+			break
+		}
+
+		return e.complexity.User.BlihToken(childComplexity), true
+
+	case "User.BlihUsername":
+		if e.complexity.User.BlihUsername == nil {
+			break
+		}
+
+		return e.complexity.User.BlihUsername(childComplexity), true
 
 	case "User.Email":
 		if e.complexity.User.Email == nil {
@@ -248,6 +264,19 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schemas/mutation.graphql", Input: `type Mutation {
+    createUser(input: NewUser!): User!
+    updateUser(login: String!, input: NewUser!): User!
+#    createRepo(input: NewRepo!): Repo!
+#    updateRepo(name: String!, input: NewRepo!): Repo!
+}`},
+	&ast.Source{Name: "schemas/query.graphql", Input: `type Query {
+    getAllUsers: [User!]!
+    getUser(login: String!): User!
+
+#    getAllRepos: [Repo!]!
+#    getRepo(name: String!): Repo!
+}`},
 	&ast.Source{Name: "schemas/user.graphql", Input: `type User {
   id: Int!
   name: String!
@@ -255,11 +284,8 @@ var parsedSchema = gqlparser.MustLoadSchema(
   email: String!
   avatarURL: String!
   token: String!
-}
-
-type Query {
-  getAllUsers: [User!]!
-  getUser(login: String!): User!
+  blihUsername: String!
+  blihToken: String!
 }
 
 input NewUser {
@@ -268,11 +294,8 @@ input NewUser {
   email: String!
   avatarUrl: String!
   token: String!
-}
-
-type Mutation {
-  createUser(input: NewUser!): User!
-  updateUser(login: String!, input: NewUser!): User!
+  blihUsername: String!
+  blihToken: String!
 }`},
 )
 
@@ -709,6 +732,60 @@ func (ec *executionContext) _User_token(ctx context.Context, field graphql.Colle
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Token, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_blihUsername(ctx context.Context, field graphql.CollectedField, obj *models.User) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BlihUsername, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_blihToken(ctx context.Context, field graphql.CollectedField, obj *models.User) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BlihToken, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1589,6 +1666,18 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, v interfa
 			if err != nil {
 				return it, err
 			}
+		case "blihUsername":
+			var err error
+			it.BlihUsername, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "blihToken":
+			var err error
+			it.BlihToken, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -1735,6 +1824,16 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "token":
 			out.Values[i] = ec._User_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "blihUsername":
+			out.Values[i] = ec._User_blihUsername(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "blihToken":
+			out.Values[i] = ec._User_blihToken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}

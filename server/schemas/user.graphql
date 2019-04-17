@@ -5,11 +5,8 @@ type User {
   email: String!
   avatarURL: String!
   token: String!
-}
-
-type Query {
-  getAllUsers: [User!]!
-  getUser(login: String!): User!
+  blihUsername: String!
+  blihToken: String!
 }
 
 input NewUser {
@@ -18,9 +15,6 @@ input NewUser {
   email: String!
   avatarUrl: String!
   token: String!
-}
-
-type Mutation {
-  createUser(input: NewUser!): User!
-  updateUser(login: String!, input: NewUser!): User!
+  blihUsername: String!
+  blihToken: String!
 }
