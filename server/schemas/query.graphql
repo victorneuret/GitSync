@@ -2,6 +2,6 @@ type Query {
     getAllUsers: [User!]!
     getUser(login: String!): User!
 
-#    getAllRepos: [Repo!]!
-#    getRepo(name: String!): Repo!
+    getAllRepos: [Repo!]!
+    getRepo(name: String!): Repo!
 }

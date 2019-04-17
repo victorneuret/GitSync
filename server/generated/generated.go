@@ -43,13 +43,25 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
+		CreateRepo func(childComplexity int, input models.NewRepo) int
 		CreateUser func(childComplexity int, input models.NewUser) int
+		UpdateRepo func(childComplexity int, name string, input models.ModifRepo) int
 		UpdateUser func(childComplexity int, login string, input models.NewUser) int
 	}
 
 	Query struct {
+		GetAllRepos func(childComplexity int) int
 		GetAllUsers func(childComplexity int) int
+		GetRepo     func(childComplexity int, name string) int
 		GetUser     func(childComplexity int, login string) int
+	}
+
+	Repo struct {
+		GithubURL func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Owner     func(childComplexity int) int
+		Private   func(childComplexity int) int
+		Updater   func(childComplexity int) int
 	}
 
 	User struct {
@@ -67,10 +79,14 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input models.NewUser) (*models.User, error)
 	UpdateUser(ctx context.Context, login string, input models.NewUser) (*models.User, error)
+	CreateRepo(ctx context.Context, input models.NewRepo) (*models.Repo, error)
+	UpdateRepo(ctx context.Context, name string, input models.ModifRepo) (*models.Repo, error)
 }
 type QueryResolver interface {
 	GetAllUsers(ctx context.Context) ([]models.User, error)
 	GetUser(ctx context.Context, login string) (*models.User, error)
+	GetAllRepos(ctx context.Context) ([]models.Repo, error)
+	GetRepo(ctx context.Context, name string) (*models.Repo, error)
 }
 
 type executableSchema struct {
@@ -88,6 +104,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Mutation.CreateRepo":
+		if e.complexity.Mutation.CreateRepo == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createRepo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateRepo(childComplexity, args["input"].(models.NewRepo)), true
+
 	case "Mutation.CreateUser":
 		if e.complexity.Mutation.CreateUser == nil {
 			break
@@ -99,6 +127,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(models.NewUser)), true
+
+	case "Mutation.UpdateRepo":
+		if e.complexity.Mutation.UpdateRepo == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateRepo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateRepo(childComplexity, args["name"].(string), args["input"].(models.ModifRepo)), true
 
 	case "Mutation.UpdateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -112,12 +152,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["login"].(string), args["input"].(models.NewUser)), true
 
+	case "Query.GetAllRepos":
+		if e.complexity.Query.GetAllRepos == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllRepos(childComplexity), true
+
 	case "Query.GetAllUsers":
 		if e.complexity.Query.GetAllUsers == nil {
 			break
 		}
 
 		return e.complexity.Query.GetAllUsers(childComplexity), true
+
+	case "Query.GetRepo":
+		if e.complexity.Query.GetRepo == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getRepo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetRepo(childComplexity, args["name"].(string)), true
 
 	case "Query.GetUser":
 		if e.complexity.Query.GetUser == nil {
@@ -130,6 +189,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetUser(childComplexity, args["login"].(string)), true
+
+	case "Repo.GithubURL":
+		if e.complexity.Repo.GithubURL == nil {
+			break
+		}
+
+		return e.complexity.Repo.GithubURL(childComplexity), true
+
+	case "Repo.Name":
+		if e.complexity.Repo.Name == nil {
+			break
+		}
+
+		return e.complexity.Repo.Name(childComplexity), true
+
+	case "Repo.Owner":
+		if e.complexity.Repo.Owner == nil {
+			break
+		}
+
+		return e.complexity.Repo.Owner(childComplexity), true
+
+	case "Repo.Private":
+		if e.complexity.Repo.Private == nil {
+			break
+		}
+
+		return e.complexity.Repo.Private(childComplexity), true
+
+	case "Repo.Updater":
+		if e.complexity.Repo.Updater == nil {
+			break
+		}
+
+		return e.complexity.Repo.Updater(childComplexity), true
 
 	case "User.AvatarURL":
 		if e.complexity.User.AvatarURL == nil {
@@ -267,15 +361,34 @@ var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schemas/mutation.graphql", Input: `type Mutation {
     createUser(input: NewUser!): User!
     updateUser(login: String!, input: NewUser!): User!
-#    createRepo(input: NewRepo!): Repo!
-#    updateRepo(name: String!, input: NewRepo!): Repo!
+
+    createRepo(input: NewRepo!): Repo!
+    updateRepo(name: String!, input: ModifRepo!): Repo!
 }`},
 	&ast.Source{Name: "schemas/query.graphql", Input: `type Query {
     getAllUsers: [User!]!
     getUser(login: String!): User!
 
-#    getAllRepos: [Repo!]!
-#    getRepo(name: String!): Repo!
+    getAllRepos: [Repo!]!
+    getRepo(name: String!): Repo!
+}`},
+	&ast.Source{Name: "schemas/repo.graphql", Input: `type Repo {
+    name: String!
+    private: Boolean!
+    githubURL: String!
+    owner: String!
+    updater: String!
+}
+
+input NewRepo {
+    name: String!
+    private: Boolean!
+    owner: String!
+}
+
+input ModifRepo {
+    private: Boolean!
+    updater: String!
 }`},
 	&ast.Source{Name: "schemas/user.graphql", Input: `type User {
   id: Int!
@@ -303,6 +416,20 @@ input NewUser {
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 models.NewRepo
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNNewRepo2githubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐNewRepo(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -314,6 +441,28 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 models.ModifRepo
+	if tmp, ok := rawArgs["input"]; ok {
+		arg1, err = ec.unmarshalNModifRepo2githubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐModifRepo(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -340,6 +489,20 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 }
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -467,6 +630,74 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	return ec.marshalNUser2ᚖgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createRepo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createRepo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateRepo(rctx, args["input"].(models.NewRepo))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Repo)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRepo2ᚖgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateRepo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateRepo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateRepo(rctx, args["name"].(string), args["input"].(models.ModifRepo))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Repo)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRepo2ᚖgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getAllUsers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -528,6 +759,67 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	return ec.marshalNUser2ᚖgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_getAllRepos(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllRepos(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]models.Repo)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRepo2ᚕgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getRepo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getRepo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetRepo(rctx, args["name"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Repo)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRepo2ᚖgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -581,6 +873,141 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repo_name(ctx context.Context, field graphql.CollectedField, obj *models.Repo) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repo_private(ctx context.Context, field graphql.CollectedField, obj *models.Repo) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Private, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repo_githubURL(ctx context.Context, field graphql.CollectedField, obj *models.Repo) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GithubURL, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repo_owner(ctx context.Context, field graphql.CollectedField, obj *models.Repo) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Owner, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repo_updater(ctx context.Context, field graphql.CollectedField, obj *models.Repo) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Updater, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) graphql.Marshaler {
@@ -1630,6 +2057,60 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputModifRepo(ctx context.Context, v interface{}) (models.ModifRepo, error) {
+	var it models.ModifRepo
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "private":
+			var err error
+			it.Private, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updater":
+			var err error
+			it.Updater, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewRepo(ctx context.Context, v interface{}) (models.NewRepo, error) {
+	var it models.NewRepo
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "private":
+			var err error
+			it.Private, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "owner":
+			var err error
+			it.Owner, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, v interface{}) (models.NewUser, error) {
 	var it models.NewUser
 	var asMap = v.(map[string]interface{})
@@ -1717,6 +2198,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createRepo":
+			out.Values[i] = ec._Mutation_createRepo(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "updateRepo":
+			out.Values[i] = ec._Mutation_updateRepo(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1771,10 +2262,85 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "getAllRepos":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllRepos(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "getRepo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getRepo(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var repoImplementors = []string{"Repo"}
+
+func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj *models.Repo) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, repoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Repo")
+		case "name":
+			out.Values[i] = ec._Repo_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "private":
+			out.Values[i] = ec._Repo_private(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "githubURL":
+			out.Values[i] = ec._Repo_githubURL(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "owner":
+			out.Values[i] = ec._Repo_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "updater":
+			out.Values[i] = ec._Repo_updater(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2109,8 +2675,67 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return graphql.MarshalInt(v)
 }
 
+func (ec *executionContext) unmarshalNModifRepo2githubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐModifRepo(ctx context.Context, v interface{}) (models.ModifRepo, error) {
+	return ec.unmarshalInputModifRepo(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNNewRepo2githubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐNewRepo(ctx context.Context, v interface{}) (models.NewRepo, error) {
+	return ec.unmarshalInputNewRepo(ctx, v)
+}
+
 func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐNewUser(ctx context.Context, v interface{}) (models.NewUser, error) {
 	return ec.unmarshalInputNewUser(ctx, v)
+}
+
+func (ec *executionContext) marshalNRepo2githubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx context.Context, sel ast.SelectionSet, v models.Repo) graphql.Marshaler {
+	return ec._Repo(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRepo2ᚕgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx context.Context, sel ast.SelectionSet, v []models.Repo) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRepo2githubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNRepo2ᚖgithubᚗcomᚋvictorneuretᚋGitSyncᚋmodelsᚐRepo(ctx context.Context, sel ast.SelectionSet, v *models.Repo) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Repo(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

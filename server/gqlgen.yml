@@ -5,6 +5,7 @@ schema:
 - schemas/user.graphql
 - schemas/query.graphql
 - schemas/mutation.graphql
+- schemas/repo.graphql
 
 exec:
   filename: generated/generated.go

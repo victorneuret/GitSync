@@ -1,14 +1,18 @@
-#type Repo {
-#    name: String!
-#    private: Boolean!
-#    githubURL: String!
-#    Owner: String!
-#    updater: String!
-#    sharedWith: [String!]!
-#}
-#
-#input NewRepo {
-#    name: String!
-#    private: Boolean!
-#    Owner: String!
-#}
+type Repo {
+    name: String!
+    private: Boolean!
+    githubURL: String!
+    owner: String!
+    updater: String!
+}
+
+input NewRepo {
+    name: String!
+    private: Boolean!
+    owner: String!
+}
+
+input ModifRepo {
+    private: Boolean!
+    updater: String!
+}

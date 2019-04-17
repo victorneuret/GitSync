@@ -24,4 +24,5 @@ func CloseDatabase() {
 
 func InitialMigration() {
 	DB.AutoMigrate(User{})
+	DB.AutoMigrate(Repo{})
 }

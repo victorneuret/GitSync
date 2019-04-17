@@ -2,6 +2,17 @@
 
 package models
 
+type ModifRepo struct {
+	Private bool   `json:"private"`
+	Updater string `json:"updater"`
+}
+
+type NewRepo struct {
+	Name    string `json:"name"`
+	Private bool   `json:"private"`
+	Owner   string `json:"owner"`
+}
+
 type NewUser struct {
 	Name         string `json:"name"`
 	Login        string `json:"login"`
@@ -10,6 +21,14 @@ type NewUser struct {
 	Token        string `json:"token"`
 	BlihUsername string `json:"blihUsername"`
 	BlihToken    string `json:"blihToken"`
+}
+
+type Repo struct {
+	Name      string `json:"name"`
+	Private   bool   `json:"private"`
+	GithubURL string `json:"githubURL"`
+	Owner     string `json:"owner"`
+	Updater   string `json:"updater"`
 }
 
 type User struct {
