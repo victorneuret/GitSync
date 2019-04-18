@@ -3,14 +3,16 @@
 package models
 
 type ModifRepo struct {
-	Private bool   `json:"private"`
-	Updater string `json:"updater"`
+	Private        bool   `json:"private"`
+	Updater        string `json:"updater"`
+	UpdateOnMaster bool   `json:"updateOnMaster"`
 }
 
 type NewRepo struct {
-	Name    string `json:"name"`
-	Private bool   `json:"private"`
-	Owner   string `json:"owner"`
+	Name           string `json:"name"`
+	Private        bool   `json:"private"`
+	Owner          string `json:"owner"`
+	UpdateOnMaster bool   `json:"updateOnMaster"`
 }
 
 type NewUser struct {
@@ -24,11 +26,12 @@ type NewUser struct {
 }
 
 type Repo struct {
-	Name      string `json:"name"`
-	Private   bool   `json:"private"`
-	GithubURL string `json:"githubURL"`
-	Owner     string `json:"owner"`
-	Updater   string `json:"updater"`
+	Name           string `json:"name"`
+	Private        bool   `json:"private"`
+	GithubURL      string `json:"githubURL"`
+	Owner          string `json:"owner"`
+	Updater        string `json:"updater"`
+	UpdateOnMaster bool   `json:"updateOnMaster"`
 }
 
 type User struct {

@@ -7,11 +7,12 @@ import (
 
 type ConfigStruct struct {
 	GithubOAuth struct {
-		ClientID string `json:"clientID"`
+		ClientID     string `json:"clientID"`
 		ClientSecret string `json:"clientSecret"`
 	}
-	RepoPath string
-	BlihSSH string
+	RepoPath    string
+	BlihSSH     string
+	URL         string
 }
 
 var Config ConfigStruct

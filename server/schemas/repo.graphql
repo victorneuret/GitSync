@@ -4,15 +4,18 @@ type Repo {
     githubURL: String!
     owner: String!
     updater: String!
+    updateOnMaster: Boolean!
 }
 
 input NewRepo {
     name: String!
     private: Boolean!
     owner: String!
+    updateOnMaster: Boolean!
 }
 
 input ModifRepo {
     private: Boolean!
     updater: String!
+    updateOnMaster: Boolean!
 }

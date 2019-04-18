@@ -58,11 +58,12 @@ type ComplexityRoot struct {
 	}
 
 	Repo struct {
-		GithubURL func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Owner     func(childComplexity int) int
-		Private   func(childComplexity int) int
-		Updater   func(childComplexity int) int
+		GithubURL      func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Owner          func(childComplexity int) int
+		Private        func(childComplexity int) int
+		UpdateOnMaster func(childComplexity int) int
+		Updater        func(childComplexity int) int
 	}
 
 	User struct {
@@ -232,6 +233,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Repo.Private(childComplexity), true
 
+	case "Repo.UpdateOnMaster":
+		if e.complexity.Repo.UpdateOnMaster == nil {
+			break
+		}
+
+		return e.complexity.Repo.UpdateOnMaster(childComplexity), true
+
 	case "Repo.Updater":
 		if e.complexity.Repo.Updater == nil {
 			break
@@ -393,17 +401,20 @@ var parsedSchema = gqlparser.MustLoadSchema(
     githubURL: String!
     owner: String!
     updater: String!
+    updateOnMaster: Boolean!
 }
 
 input NewRepo {
     name: String!
     private: Boolean!
     owner: String!
+    updateOnMaster: Boolean!
 }
 
 input ModifRepo {
     private: Boolean!
     updater: String!
+    updateOnMaster: Boolean!
 }`},
 	&ast.Source{Name: "schemas/user.graphql", Input: `type User {
   id: Int!
@@ -1079,6 +1090,33 @@ func (ec *executionContext) _Repo_updater(ctx context.Context, field graphql.Col
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Repo_updateOnMaster(ctx context.Context, field graphql.CollectedField, obj *models.Repo) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Repo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateOnMaster, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) graphql.Marshaler {
@@ -2146,6 +2184,12 @@ func (ec *executionContext) unmarshalInputModifRepo(ctx context.Context, v inter
 			if err != nil {
 				return it, err
 			}
+		case "updateOnMaster":
+			var err error
+			it.UpdateOnMaster, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -2173,6 +2217,12 @@ func (ec *executionContext) unmarshalInputNewRepo(ctx context.Context, v interfa
 		case "owner":
 			var err error
 			it.Owner, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updateOnMaster":
+			var err error
+			it.UpdateOnMaster, err = ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2423,6 +2473,11 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "updater":
 			out.Values[i] = ec._Repo_updater(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "updateOnMaster":
+			out.Values[i] = ec._Repo_updateOnMaster(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}

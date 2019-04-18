@@ -23,6 +23,7 @@ func (r *queryResolver) GetAllRepos(ctx context.Context) ([]models.Repo, error) 
 			GithubURL: repos[i].GithubURL,
 			Owner: repos[i].Owner,
 			Updater: repos[i].Updater,
+			UpdateOnMaster: repos[i].UpdateOnMaster,
 		})
 	}
 	return gqlRepo, nil
@@ -40,6 +41,7 @@ func (r *queryResolver) GetRepo(ctx context.Context, name string) (*models.Repo,
 		GithubURL: repo.GithubURL,
 		Owner: repo.Owner,
 		Updater: repo.Updater,
+		UpdateOnMaster: repo.UpdateOnMaster,
 	}, nil
 }
 
@@ -57,6 +59,7 @@ func (r *queryResolver) GetRepoFromOwner(ctx context.Context, owner string) ([]m
 			GithubURL: repos[i].GithubURL,
 			Owner: repos[i].Owner,
 			Updater: repos[i].Updater,
+			UpdateOnMaster: repos[i].UpdateOnMaster,
 		})
 	}
 	return gqlRepo, nil
@@ -93,6 +96,7 @@ func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewR
 		GithubURL: "https://github.com/" + input.Owner + "/" + input.Name,
 		Owner: input.Owner,
 		Updater: input.Owner,
+		UpdateOnMaster: input.UpdateOnMaster,
 	}
 	database.DB.Create(&repo)
 
@@ -104,6 +108,7 @@ func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewR
 		GithubURL: gqlRepo.GithubURL,
 		Owner: gqlRepo.Owner,
 		Updater: gqlRepo.Updater,
+		UpdateOnMaster: gqlRepo.UpdateOnMaster,
 	}, nil
 }
 
@@ -117,6 +122,7 @@ func (r *MutationResolverType) UpdateRepo(ctx context.Context, name string, inpu
 	if input.Updater != "" {
 		repo.Updater = input.Updater
 	}
+	repo.UpdateOnMaster = input.UpdateOnMaster
 	database.DB.Save(&repo)
 
 	return &models.Repo{
@@ -125,5 +131,6 @@ func (r *MutationResolverType) UpdateRepo(ctx context.Context, name string, inpu
 		GithubURL: repo.GithubURL,
 		Owner: repo.Owner,
 		Updater: repo.Updater,
+		UpdateOnMaster: repo.UpdateOnMaster,
 	}, nil
 }
