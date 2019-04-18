@@ -78,6 +78,10 @@ func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewR
 	if database.DB.Where(&database.User{Login: input.Owner}).First(&user).RecordNotFound() {
 		return nil, gqlerror.Errorf("User " + input.Owner + " does not exist")
 	}
+	if user.BlihUsername == "" || user.BlihToken == "" {
+		return nil, gqlerror.Errorf("User " + input.Owner + " have missing blih informations")
+	}
+
 
 	if !app.CreateGitHubRepo(input.Name, input.Private, token) {
 		return nil, gqlerror.Errorf("Can't create github repo " + input.Name)
@@ -88,6 +92,10 @@ func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewR
 	if !app.SetMirror(input.Name, user.BlihUsername, user.Login) {
 		return nil, gqlerror.Errorf("Mirror of " + input.Name + " failed")
 	}
+	if !app.CreateGitHubHook(input.Name, user.Login, user.Token) {
+		return nil, gqlerror.Errorf("Github webhook creation of " + input.Name + " failed")
+	}
+
 
 
 	repo := database.Repo{

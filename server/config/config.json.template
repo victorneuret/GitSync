@@ -4,5 +4,6 @@
     "clientSecret": ""
   },,
   "RepoPath": "~/repos/",
-  "BlihSSH": "git@git.epitech.eu"
+  "BlihSSH": "git@git.epitech.eu",
+  "URL": "http://localhost:8080"
 }
