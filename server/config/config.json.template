@@ -1,9 +1,14 @@
 {
+  "Prod": false,
   "GithubOAuth": {
     "clientID": "",
     "clientSecret": ""
-  },,
-  "RepoPath": "~/repos/",
+  },
+  "RepoPath": "/home/victor/repos/",
   "BlihSSH": "git@git.epitech.eu",
-  "URL": "http://localhost:8080"
+  "URL": "http://localhost:8080",
+  "Database": {
+    "Name": "sqlite3",
+    "Parameters": "gorm.db"
+  }
 }

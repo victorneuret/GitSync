@@ -28,7 +28,9 @@ func main() {
 	defer database.CloseDatabase()
 	database.InitialMigration()
 
-	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
+	if !config.Config.Prod {
+		http.Handle("/", handler.Playground("GraphQL playground", "/query"))
+	}
 	http.Handle("/query", handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}})))
 
 	githubLogin.Setup()
