@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/victorneuret/GitSync/app"
 	"log"
 	"net/http"
 	"os"
@@ -31,6 +32,7 @@ func main() {
 	http.Handle("/query", handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}})))
 
 	githubLogin.Setup()
+	http.HandleFunc("/hook", app.HandleWebHook)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

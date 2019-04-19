@@ -70,7 +70,7 @@ func (r *queryResolver) GetRepoFromOwner(ctx context.Context, owner string) ([]m
 // MUTATION
 
 func (r *MutationResolverType) CreateRepo(ctx context.Context, input models.NewRepo, token string) (*models.Repo, error) {
-	if !database.DB.Where(&database.Repo{Name: input.Name}).First(&database.Repo{}).RecordNotFound() {
+	if !database.DB.Where(&database.Repo{Name: input.Name, Owner: input.Owner}).First(&database.Repo{}).RecordNotFound() {
 		return nil, gqlerror.Errorf("Repository " + input.Name + " already exist")
 	}
 

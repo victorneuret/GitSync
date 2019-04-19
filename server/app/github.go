@@ -1,10 +1,11 @@
 package app
 
 import (
+	"context"
 	"github.com/google/go-github/github"
 	"github.com/victorneuret/GitSync/config"
 	"golang.org/x/oauth2"
-	"context"
+	"net/http"
 )
 
 func connectUser(token string) *github.Client {
@@ -33,7 +34,7 @@ func CreateGitHubHook(name string, login string, token string) bool {
 	active := true
 
 	hookConfig := map[string]interface{}{
-		"url":          config.Config.URL + "/hook/" + login + "-" + name,
+		"url":          config.Config.URL + "/hook/?login=" + login + "&name=" + name,
 		"content_type": "json",
 	}
 	myHook := &github.Hook{
@@ -46,4 +47,18 @@ func CreateGitHubHook(name string, login string, token string) bool {
 		return false
 	}
 	return true
+}
+
+func HandleWebHook(w http.ResponseWriter, r *http.Request) {
+	login, err := r.URL.Query()["login"]
+	if !err || len(login[0]) < 1 {
+		return
+	}
+
+	name, err := r.URL.Query()["name"]
+	if !err || len(name[0]) < 1 {
+		return
+	}
+
+	SyncMirror(name[0], login[0])
 }
