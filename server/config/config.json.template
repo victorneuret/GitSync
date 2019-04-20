@@ -9,6 +9,6 @@
   "URL": "http://localhost:8080",
   "Database": {
     "Name": "sqlite3",
-    "Parameters": "gorm.db"
+    "Parameter": "gorm.db"
   }
 }

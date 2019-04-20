@@ -15,7 +15,7 @@ func Setup() {
 	oauth2Config := &oauth2.Config{
 		ClientID:     config.Config.GithubOAuth.ClientID,
 		ClientSecret: config.Config.GithubOAuth.ClientSecret,
-		RedirectURL:  "http://localhost:8080/github/callback",
+		RedirectURL:  config.Config.URL + "/github/callback",
 		Endpoint:     githubOAuth2.Endpoint,
 		Scopes:       []string{"read:user", "user:email", "repo"},
 
