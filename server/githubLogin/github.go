@@ -18,8 +18,9 @@ func Setup() {
 		RedirectURL:  "http://localhost:8080/github/callback",
 		Endpoint:     githubOAuth2.Endpoint,
 		Scopes:       []string{"read:user", "user:email", "repo"},
+
 	}
-	stateConfig:= gologin.DebugOnlyCookieConfig
+	stateConfig := gologin.CookieConfig{}
 	http.Handle("/github/login", github.StateHandler(stateConfig, github.LoginHandler(oauth2Config, nil)))
 	http.Handle("/github/callback", github.StateHandler(stateConfig, github.CallbackHandler(oauth2Config, issueSession(), nil)))
 }
