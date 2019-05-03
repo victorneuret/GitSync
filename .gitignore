@@ -13,6 +13,8 @@
 
 # Goland
 .idea
+*.mod
+*.sum
 
 # Dev database
 *.db
