@@ -1,9 +1,8 @@
 import React from 'react';
-import { Grommet, Heading } from 'grommet';
+import { Grommet, Heading, Box } from 'grommet';
 import {
   BrowserRouter as Router,
   Route,
-  Link,
   Switch,
 } from 'react-router-dom';
 
@@ -13,11 +12,14 @@ import AuthRequired from './Components/AuthRequired';
 import AuthNotRequired from './Components/AuthNotRequired';
 import NavBar from './Components/NavBar';
 import Login from './Components/Login';
+import Links from './Components/Links';
 import Register from './Components/Register';
 import NotFound from './Components/NotFound';
+import Repos from './Components/Repos';
+import Users from './Components/Users';
 
 const Hello: React.FC = () => (
-  <Heading>Hello world!</Heading>
+  <Heading>Hello</Heading>
 );
 
 const Admin: React.FC = () => (
@@ -29,24 +31,18 @@ const App: React.FC = () => (
     <Router>
       <Grommet theme={Theme}>
         <NavBar />
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/login">Login</Link>
-          </li>
-          <li>
-            <Link to="/register">Register</Link>
-          </li>
-        </ul>
+        <Box fill align='center' justify='start' pad='large'>
+          <Links />
           <Switch>
             <Route exact path='/' component={Hello} />
             <AuthNotRequired path='/register' component={Register} />
+            <AuthRequired path='/users' component={Users} />
+            <AuthRequired path='/repos' component={Repos} />
             <AuthNotRequired path='/login' component={Login} />
             <AuthRequired path='/admin' component={Admin} />
             <Route component={NotFound} />
           </Switch>
+        </Box>
       </Grommet>
     </Router>
   </AuthProvider>

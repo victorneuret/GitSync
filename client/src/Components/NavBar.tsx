@@ -19,11 +19,7 @@ const AppBar: React.FC = (props) => (
 const NavBar: React.FC = () => (
   <AppBar>
     <Heading level='3' margin='none'>GitSync</Heading>
-    <Box
-      direction='row'
-      justify='between'
-      align='center'
-      gap='medium'>
+    <Box direction='row' justify='between' align='center' gap='medium'>
       <AuthConsumer>
         {({ isAuth, login, logout }) => isAuth ? (
             <Anchor label='Sign out' onClick={ logout } />

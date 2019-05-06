@@ -1,5 +1,7 @@
 import React from 'react';
 
+import PersistentState from './PersistentState';
+
 const _empty = (): void => {};
 
 const AuthContext = React.createContext({
@@ -8,20 +10,20 @@ const AuthContext = React.createContext({
   logout: _empty
 });
 
-class AuthProvider extends React.Component {
-  state = {
-    isAuth: false ,
-    login: () => this.setState({ isAuth: true }),
-    logout: () => this.setState({ isAuth: false })
-  };
+const AuthProvider: React.FC = (props) => {
+  const [isAuth, setAuth] = PersistentState('isAuth', false);
 
-  render() {
-    return (
-      <AuthContext.Provider value={this.state}>
-        {this.props.children}
-      </AuthContext.Provider>
-    );
-  };
+  return (
+    <AuthContext.Provider
+      value={{
+        isAuth: isAuth,
+        login: () => setAuth(true),
+        logout: () => setAuth(false)
+      }}
+    >
+      {props.children}
+    </AuthContext.Provider>
+  );
 };
 
 const AuthConsumer = AuthContext.Consumer;
